@@ -110,15 +110,17 @@ void Desenha(void)
 	glPushMatrix();
 		glTranslatef(-30.0f, 0.0f, 0.0f);
 		glScalef(16.0f, 16.0f, 16.0f);
-		glColor3f(1.0f, 1.0f, 1.0f);
+		// cor magenta pra testar os modos de textura (antes era branco 1 1 1)
+		glColor3f(1.0f, 0.0f, 1.0f);
 		glBegin (GL_QUADS );
 		// Especifica a coordenada de textura para cada vértice
 			// Face frontal
 			glNormal3f(0.0f,0.0f,-1.0f);
-			glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
-			glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
-			glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-			glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);				
+			// coordenadas de textura fora do intervalo 0 a 1 pra testar o clamp e o repeat
+			glTexCoord2f(-1.0f, -1.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
+			glTexCoord2f( 1.0f, -1.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
+			glTexCoord2f( 1.0f,  1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
+			glTexCoord2f(-1.0f,  1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);				
 			// Face posterior
 			glNormal3f(0.0f,0.0f,1.0f);
 			glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -199,17 +201,25 @@ void Inicializa (void)
 
 	if (data)	{
 	// Envio da textura para OpenGL
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_BGR,GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB,GL_UNSIGNED_BYTE, data);
 	}
 	else{
         printf("Failed to load texture" );
     }
 	
 	// Define os filtros de magnificação e minificação 
+	// filtro trocado de GL_LINEAR pra GL_NEAREST (pra comparar volta pra GL_LINEAR)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);   
 
 	stbi_image_free(data); 
+
+	// como tratar coordenadas fora de 0 a 1 (testar GL_CLAMP e depois GL_REPEAT)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// modo de textura (testar GL_MODULATE depois GL_DECAL e depois GL_BLEND)
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_LINEAR);
 
 }
 
